@@ -153,11 +153,10 @@ int main(int argc, char* argv[]){
 		cout << "Acc: " << ACC << endl;
 		cout << "PC: " << PC << endl << endl;
 		
-	/*	debug mostra operacoes pausadas
-			cin.clear();
-			fflush(stdin);
-			cin.get(); 
-	*/
+/*	debug mostra operacoes pausadas
+		cin.clear();
+		fflush(stdin);
+		cin.get(); */
 	}
 	arq_entrada.close();
 

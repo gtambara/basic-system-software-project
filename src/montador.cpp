@@ -1,6 +1,8 @@
 //Universidade de Brasilia - Departamento de Ciencia da Computacao - 1/2021 (Novembro de 2021)
 //Autor: 		Gabriel Tambara Rabelo
 //Matricula: 	18/0017021
+//Compilador: GCC/G++ 6.3.0 MinGW
+//OS: Windows 10
 
 #include <iostream>
 #include <string>
@@ -33,7 +35,6 @@ class item_simbolo{
 		}
 };
 
-// classe resposnável por representar o conteúdo de uma linha de código
 class item_linha{
 	public:
 		string rotulo, operacao, arg1, arg1vetor, arg2, arg2vetor;
@@ -52,14 +53,12 @@ class item_linha{
 		}
 };
 
-// struct com os dados referentes a uma instruçao
 struct item_instrucao{
 	string operador;
 	int opcode;
 	int argumentos;
 };
 
-// funçao de uppercase visando evitar propriedade de case sensitive
 string uppercase(string entrada){
 	locale loc;
 	for(int i = 0 ; i < entrada.size() ;i++){
@@ -68,7 +67,6 @@ string uppercase(string entrada){
 	return entrada;
 }
 
-// verificacao de dado numerico para argumento
 bool is_number(string str) {	
 
 	if(str.front() == '-'){
@@ -83,36 +81,25 @@ bool is_number(string str) {
     return true;
 }
 
-
-// verificacao de numero inteiro para argumento
 bool is_integer(float num){
   return floor(num) == num;
 }
 
-// analisador lexico da linguagem
 void anal_Lexico(string str, int *contador_linha){
 	int n = str.length();
-
-	if(str.size() > 50){
-		cout << "Erro lexico na linha " << to_string(*contador_linha) <<". Token " << str << " de tamanho invalido." <<  endl;
-	}
 	
     if (!(str[0] == '_' or (str[0] >= 'a' and str[0] <= 'z') or (str[0] >= 'A' and str[0] <= 'Z'))){
-		cout << "Erro lexico na linha " << to_string(*contador_linha) <<". Token " << str << "  invalido." <<  endl;
 		return;
 	}
  
     for (int i = 1; i < str.length(); i++) {
         if (!(str[i] == '_' or (str[i] >= 'a' and str[i] <= 'z') or (str[i] >= 'A' and str[i] <= 'Z') or (str[i] >= '0' and str[i] <= '9'))){
-			cout << "Erro lexico na linha " << to_string(*contador_linha) <<". Token " << str << "  invalido." <<  endl;
 			return;
 		}
     }
 }
 
-// parser para separar conteúdo das linhas de código para devida análise
 void parser(string *linha, int *contador_palavra, item_linha *itens, int *contador_palavra_aux, bool *ordem_alt, bool *secText_lido, int *contador_linha, bool *ha_rotulo, item_instrucao tabela_de_simbolos[]){
-	
 	int aux;
 	vector<string> tokens;
 	string token;
@@ -130,7 +117,7 @@ void parser(string *linha, int *contador_palavra, item_linha *itens, int *contad
 	(*itens).arg1vetor = " ";
 	(*itens).arg2vetor = " ";
 
-	// Lida com o caso de não haver espaço entre rótulo e operador
+// Lida com o caso de não haver espaço entre rótulo e operador
 	if((*linha).find(":") != string::npos){
 		(*linha).insert((*linha).find(":") + 1 , " ", 0, string::npos);
 	}
@@ -141,8 +128,6 @@ void parser(string *linha, int *contador_palavra, item_linha *itens, int *contad
 		while((*linha)[virgula + 1] == ' '){
 			(*linha).erase(virgula + 1,1);
 		}
-		printf("Erro sintatico na linha %d. ", *contador_linha);
-		printf("Espacos inadequados entre operandos de COPY apos virgula. Ref.: 'COPY A,B' \n");
 	}
 	virgula = (*linha).find(",");
 	if(virgula > 0){
@@ -150,9 +135,7 @@ void parser(string *linha, int *contador_palavra, item_linha *itens, int *contad
 			while((*linha)[virgula - 1] == ' '){
 				(*linha).erase(virgula - 1,1);
 				virgula = (*linha).find(",");
-			}
-			printf("Erro sintatico na linha %d. ", *contador_linha);
-			printf("Espacos inadequados entre operandos de COPY antes da virgula. Ref.: 'COPY A,B' \n");					
+			}					
 		}	
 	}
 	
@@ -179,10 +162,6 @@ void parser(string *linha, int *contador_palavra, item_linha *itens, int *contad
 		aux = tokens[i].find(':');
 	
 		if(aux != string::npos){
-			if(*ha_rotulo == true){
-				printf("Erro sintatico na linha %d. ", *contador_linha);
-				printf("Outro rotulo foi previamente declarado na mesma linha.\n");
-			}
 			*ha_rotulo = true;
 
 			tokens[i].pop_back();
@@ -215,8 +194,6 @@ void parser(string *linha, int *contador_palavra, item_linha *itens, int *contad
 			tokens[i][aux] = 'a';
 			if(count(tokens[i].begin(), tokens[i].end(), ',')){
 				tokens[i][aux] = ',';
-				printf("Erro sintatico na linha %d. ", *contador_linha);
-				printf("Numero invalido de argumentos para operador.\n");
 				while(count(tokens[i].begin(), tokens[i].end(), ',') > 1){
 					tokens[i] = tokens[i].substr(0,tokens[i].rfind(","));
 				}
@@ -256,16 +233,12 @@ void parser(string *linha, int *contador_palavra, item_linha *itens, int *contad
 		*ha_rotulo = false;
 	}else{
 		if((*itens).flag_rot == true and (*itens).arg1 == " " and (*itens).arg2 == " " and (*itens).operacao == " "){
-			if(*ha_rotulo == true){
-				printf("Erro sintatico na linha %d. ", *contador_linha);
-				printf("Redeclaracao de rotulo na mesma linha.\n");
-			}
 			(*itens).flag_rot = true;
 			*ha_rotulo = true;
 		}
 	}
 
-	// analise de erros:
+// analise de erros:
 	bool achou_operador = false;
 	int aux_soma = 0;
 	if(tem_copy == true){
@@ -276,27 +249,13 @@ void parser(string *linha, int *contador_palavra, item_linha *itens, int *contad
 		for(int k=0; k < 14  ;k++){
 			if( (*itens).operacao == tabela_de_simbolos[k].operador ){
 				achou_operador = true; 
-				if(tokens.size() + aux_soma != tabela_de_simbolos[k].argumentos + 1){
-					printf("Erro sintatico na linha %d. ", *contador_linha);
-					printf("Numero invalido de argumentos para operador.\n");
-				}
 			}
-		}if(achou_operador == false and tokens.size() < 2 and tokens.size() > 4){
-			printf("Erro sintatico na linha %d. ", *contador_linha);
-			printf("Numero invalido de argumentos para qualquer possivel operador(nao identificado).\n");
 		}
 	}else{
 		for(int k=0; k < 14  ;k++){
 			if( (*itens).operacao == tabela_de_simbolos[k].operador ){
 				achou_operador = true;
-				if(tokens.size() + aux_soma != tabela_de_simbolos[k].argumentos){
-					printf("Erro sintatico na linha %d. ", *contador_linha);
-					printf("Numero invalido de argumentos para operador.\n");
-				}
 			}
-		}if(achou_operador == false and tokens.size() < 2 and tokens.size() > 4){
-			printf("Erro sintatico na linha %d. ", *contador_linha);
-			printf("Numero invalido de argumentos para qualquer possivel operador(nao identificado).\n");
 		}
 	}
 	if((*itens).rotulo != " "){
@@ -307,39 +266,25 @@ void parser(string *linha, int *contador_palavra, item_linha *itens, int *contad
 	}
 	if((*itens).arg1 != " "){
 		if(((*itens).operacao == "CONST" or (*itens).operacao == "SPACE") and ! is_number((*itens).arg1)){
-			printf("Erro semantico na linha %d. ", *contador_linha);
-			printf("Argumento de diretiva nao eh um numero.\n");
 		}else if(! is_number((*itens).arg1) ){
 			anal_Lexico((*itens).arg1, contador_linha);
 		}
 	}
 	if((*itens).arg2 != " "){
 		if(((*itens).operacao == "CONST" or (*itens).operacao == "SPACE")){
-			printf("Erro sintatico na linha %d. ", *contador_linha);
-			printf("Numero de argumentos de diretiva invalidos.\n");
 		}else if(! is_number((*itens).arg2) ){
 			anal_Lexico((*itens).arg2, contador_linha);
 		}
 	}
-	if((*itens).operacao == "SPACE" and is_number((*itens).arg1)){
-		if(stoi((*itens).arg1) < 0 ){
-			printf("Erro semantico na linha %d. ", *contador_linha);
-			printf("Argumento de diretiva SPACE deve ser um valor positivo ou nulo.\n");
-		}
-	}
+
 	if(!is_number((*itens).arg1vetor) and (*itens).arg1vetor != " "){
-		printf("Erro semantico na linha %d. ", *contador_linha);
-		printf("Indice de acesso a vetor nao eh um numero.\n");
 		(*itens).arg1vetor = "0";
 	}
 	if(!is_number((*itens).arg2vetor) and (*itens).arg2vetor != " "){
-		printf("Erro semantico na linha %d. ", *contador_linha);
-		printf("Indice de acesso a vetor nao eh um numero.\n");
 		(*itens).arg2vetor = "0";
 	}
 };
 
-// funcao responsável por manusear as tabelas de dados
 int handle_tabelas(vector<item_simbolo> *p_tabela_simbolos, item_linha itens, item_instrucao tabela_inst[14], int *contador_palavra, vector<int> *arq_saida, bool *ordem_alt, bool *secText_lido, vector<int> *arq_saida_aux, int *contador_palavra_aux, bool *flag_alt_order, int *contador_linha, bool *secData_lido, vector<int> *mapa_de_bits){
 
 	// inicializações principais
@@ -371,12 +316,21 @@ int handle_tabelas(vector<item_simbolo> *p_tabela_simbolos, item_linha itens, it
 	// define o principal aumento de tamanho do arquivo saída
 	if(itens.operacao != " " and itens.operacao != "CONST" and itens.operacao != "SPACE"){
 		tamanho_a_aumentar++;
+		(*mapa_de_bits).push_back(0);
+		
+	}
+	if(itens.operacao == "CONST"){
+		(*mapa_de_bits).push_back(0);
 	}
 	if(itens.arg1 != " " and itens.operacao != "CONST" and itens.operacao != "SPACE"){
 		tamanho_a_aumentar++;
+		(*mapa_de_bits).push_back(1);
+		
 	}
 	if(itens.arg2 != " " and itens.operacao != "CONST" and itens.operacao != "SPACE"){
 		tamanho_a_aumentar++;
+		(*mapa_de_bits).push_back(1);		
+		
 	}
 	while(tamanho_a_aumentar > 0){
 		if(*ordem_alt == true and *secText_lido == false){
@@ -400,21 +354,12 @@ int handle_tabelas(vector<item_simbolo> *p_tabela_simbolos, item_linha itens, it
 				flag_acha_simbolo = true;
 			}
 		}
-		if(flag_acha_simbolo == false){
-			cout << "Erro semantico na linha " << *contador_linha << ". Simbolo ausente declarado." << endl;
-		}
 	}
 	
 	//trata o rótulo da linha
 	if(itens.rotulo != " "){
 		for(int i = 0; i < (*p_tabela_simbolos).size(); i++){
 			if((*p_tabela_simbolos)[i].token == itens.rotulo){
-				if((*p_tabela_simbolos)[i].definido == true){
-					cout << "Erro semantico na linha " << *contador_linha << ". Simbolo "<< itens.rotulo << " previamente declarado." << endl;
-				}else if(*ordem_alt == true and (*p_tabela_simbolos)[i].insercoes == 0){
-					cout << "Erro semantico na linha " << *contador_linha << ". Simbolo "<< itens.rotulo << " previamente declarado." << endl;
-				}
-				
 				simbolo_existente = true;
 				indice = i;
 			}
@@ -441,6 +386,7 @@ int handle_tabelas(vector<item_simbolo> *p_tabela_simbolos, item_linha itens, it
 			//Loop de preenchimento de pendências
 			if(*ordem_alt == false or (*ordem_alt == true and *secText_lido == true)){
 				while((*p_tabela_simbolos)[indice].pendencia.size() > 1){
+/*DEBUG*/	//		cout << "item da pilha de tras/ posicao a somar(vetor) / tamanho: " << (*p_tabela_simbolos)[indice].pendencia.back()[0] << "/ " << (*p_tabela_simbolos)[indice].pendencia.back()[1] << "/ " << (*p_tabela_simbolos)[indice].pendencia.size() << endl;
 					(*arq_saida).at((*p_tabela_simbolos)[indice].pendencia.back()[0]) = itens.indice_linha + (*p_tabela_simbolos)[indice].pendencia.back()[1];
 					(*p_tabela_simbolos)[indice].pendencia.pop_back();
 				}
@@ -455,22 +401,24 @@ int handle_tabelas(vector<item_simbolo> *p_tabela_simbolos, item_linha itens, it
 	if(itens.operacao != " "){
 		for(int i = 0; i < 14; i++){
 			if(tabela_inst[i].operador == itens.operacao){
-
+				//(*arq_saida).insert((*arq_saida).begin() + itens.indice_linha, tabela_inst[i].opcode);
 				if(*ordem_alt == false or (*ordem_alt == true and *secText_lido == true) ){
-					(*arq_saida).at(itens.indice_linha) = tabela_inst[i].opcode;			
+					(*arq_saida).at(itens.indice_linha) = tabela_inst[i].opcode;
+//					cout << "\nindice: " << (*arq_saida)[itens.indice_linha] << "\n\n" << endl;					
 				}else{
 					(*arq_saida_aux).push_back(tabela_inst[i].opcode);
 					*contador_palavra = *contador_palavra + 1;
 					if(*ordem_alt == true and *secText_lido == true){
 						*contador_palavra_aux = *contador_palavra_aux + 1;
-					}									
+					}
+//					cout << "\nindice: " << (*arq_saida_aux).back() << "\n\n" << endl;									
 				}
 				tem_opcode = true;
 				break;
 			}
 		}
 		if(tem_opcode == false){
-			// caso de ser diretiva
+			// é diretiva
 			if(*ordem_alt == false or (*ordem_alt == true and *secText_lido == true)){
 				if(itens.operacao == "SPACE"){
 					if( is_number(itens.arg1) ){
@@ -480,6 +428,7 @@ int handle_tabelas(vector<item_simbolo> *p_tabela_simbolos, item_linha itens, it
 						}				
 						while(tamanho_vetor >= 1){
 							(*arq_saida).push_back(0);
+							(*mapa_de_bits).push_back(0);
 							
 							*contador_palavra = *contador_palavra + 1;
 							if(*ordem_alt == true and *secText_lido == true){
@@ -489,12 +438,13 @@ int handle_tabelas(vector<item_simbolo> *p_tabela_simbolos, item_linha itens, it
 						}
 					}else if( itens.arg1 == " " ){
 						(*arq_saida).push_back(0);
+						(*mapa_de_bits).push_back(0);
 						*contador_palavra = *contador_palavra + 1;
 						if(*ordem_alt == true and *secText_lido == true){
 							*contador_palavra_aux = *contador_palavra_aux + 1;
 						}
 					}
-		
+			
 					return 0;
 				}else if(itens.operacao == "CONST"){
 					if(is_number(itens.arg1)){
@@ -509,9 +459,6 @@ int handle_tabelas(vector<item_simbolo> *p_tabela_simbolos, item_linha itens, it
 					}
 
 					return 0;
-				}else{
-					printf("Erro sintatico na linha %d. ", *contador_linha);
-					printf("Operador/Diretiva invalido/a. \n");
 				}
 			}else{
 				if(itens.operacao == "SPACE"){
@@ -536,9 +483,10 @@ int handle_tabelas(vector<item_simbolo> *p_tabela_simbolos, item_linha itens, it
 						*contador_palavra = *contador_palavra + 1;
 						if(*ordem_alt == true and *secText_lido == true){
 							*contador_palavra_aux = *contador_palavra_aux + 1;
-						}	
+						}
+						
 					}
-		
+			
 					return 0;
 				}else if(itens.operacao == "CONST"){
 					if(is_number(itens.arg1)){
@@ -553,15 +501,12 @@ int handle_tabelas(vector<item_simbolo> *p_tabela_simbolos, item_linha itens, it
 					}
 					
 					return 0;
-				}else{
-					printf("Erro sintatico na linha %d. ", *contador_linha);
-					printf("Operador/Diretiva invalido/a. \n");
 				}			
 			}
 		}
 	}	
 
-	// resetando o item base
+	// resetando item base
 	item.token = " ";
 	item.valor = 0;
 	item.definido = false;
@@ -590,6 +535,7 @@ int handle_tabelas(vector<item_simbolo> *p_tabela_simbolos, item_linha itens, it
 					((*p_tabela_simbolos)[i].pendencia).push_back(aux2);
 					(*arq_saida).at(itens.indice_linha + 1) = 0;
 					
+//					cout << "\nteste pendencia arg1:"  << to_string(((*p_tabela_simbolos)[i].pendencia).back()[0])  <<" com indices de vetor: " << to_string(((*p_tabela_simbolos)[i].pendencia).back()[1]) << "na linha: "  << endl;
 				}
 			}
 		}
@@ -646,25 +592,26 @@ int handle_tabelas(vector<item_simbolo> *p_tabela_simbolos, item_linha itens, it
 			((*p_tabela_simbolos)[indice_final].pendencia).push_back(aux5);
 			(*arq_saida).at(itens.indice_linha + 2) = 0;
 		}
+		//alternativa?  (*arq_saida).insert((*arq_saida).end(), 0);
 	}
+
 	return 0;
 
 }
 
-// lida com ordem alternative de header do código
 int handle_ordem_alt(vector<item_simbolo> *p_tabela_simbolos, int *p_contador_palavra, vector<int> *arq_saida, vector<int> *arq_saida_aux, int *p_contador_palavra_aux, vector<int> *arq_saida_final){
-	
+
 	for(int i = 0; i < (*p_tabela_simbolos).size() ; i++){
 		if((*p_tabela_simbolos)[i].definido == false or ( (*p_tabela_simbolos)[i].definido == true and ((*p_tabela_simbolos)[i].insercoes) == 0 )){
 			(*p_tabela_simbolos)[i].definido = true;
 			(*p_tabela_simbolos)[i].valor += *p_contador_palavra;
 			
 			if(((*p_tabela_simbolos)[i].insercoes) == 0){
-				cout << "Erro semantico na linha " << (*p_tabela_simbolos)[i].linha_declarada  << ". Simbolo ausente declarado."<< endl;
 				continue;
 			}
 			
 			while( (*p_tabela_simbolos)[i].pendencia.size() > 1 ){
+//				cout << "item da pilha de tras / tamanho: " << (*p_tabela_simbolos)[i].token << " "  << (*p_tabela_simbolos)[i].pendencia.back()[0] << " " << (*p_tabela_simbolos)[i].pendencia.back()[1] << "/ " << (*p_tabela_simbolos)[i].pendencia.size() << endl;
 				(*arq_saida).at((*p_tabela_simbolos)[i].pendencia.back()[0]) = (*p_tabela_simbolos)[i].valor + (*p_tabela_simbolos)[i].pendencia.back()[1];
 				(*p_tabela_simbolos)[i].pendencia.pop_back();
 			}
@@ -783,6 +730,9 @@ int main(int argc, char* argv[]){
 	while(getline(arq_entrada, linha)){
 		contador_linha++;
 
+//		cout << "\nA linha coletada eh essa: " << linha  << endl;
+		// ignora os comentários das linhas
+
 		if(linha.find(";") != string::npos){
 			linha = linha.substr(0, linha.find(";"));
 		}
@@ -840,6 +790,6 @@ int main(int argc, char* argv[]){
     }
 	
 	outFile.close();
-	
+
     return 0;
 }
